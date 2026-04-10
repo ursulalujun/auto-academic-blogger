@@ -1,0 +1,4 @@
+interface:
+  display_name: "HF Weekly Papers"
+  short_description: "Build weekly themed HF paper digests"
+  default_prompt: "Use $huggingface-weekly-paper-digest to build a weekly Hugging Face paper digest for wid W12 and themes spatial intelligence, world model, video understanding, tool-use agent. Always write outputs to /Users/ursula/Documents/Playground/daily_paper/2026-W12, write one non-empty Summary block per theme, and write one standalone top-paper markdown with Motivation, Method, and Insights for the highest-upvoted paper in each theme."

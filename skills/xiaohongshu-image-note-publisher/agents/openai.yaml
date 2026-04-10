@@ -1,0 +1,4 @@
+interface:
+  display_name: "Xiaohongshu Publisher"
+  short_description: "Publish one Xiaohongshu image note from Safari"
+  default_prompt: "Use $xiaohongshu-image-note-publisher to publish one Xiaohongshu 图文笔记 from the user's normal logged-in Safari creator page. Validate title <= 20 chars and body <= 1000 chars. When lightly polishing Xiaohongshu copy, you may add a few neutral emojis sparingly in the title or section headers, but keep the overall tone readable and not flashy. For weekly-summary posts, prefer 文字配图 with cover text like 第13周huggingface daily paper小结; otherwise upload the cover image. Then fill title and正文, click 发布, and only report success if the final URL contains published=true."
