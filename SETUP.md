@@ -1,5 +1,7 @@
 # Setup Guide
 
+[中文](./SETUP.zh-CN.md) | **English**
+
 This document gives a practical setup path for using the skills in this repository.
 
 ## 1. Clone The Repo
