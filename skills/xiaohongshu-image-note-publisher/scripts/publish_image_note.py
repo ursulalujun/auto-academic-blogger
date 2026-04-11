@@ -5,15 +5,22 @@ import argparse
 import base64
 import json
 import random
+import re
 import subprocess
 import sys
+import tempfile
 import textwrap
 import time
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Optional
 
 
 PUBLISH_URL = "https://creator.xiaohongshu.com/publish/publish"
+NOTE_MANAGER_URL = "https://creator.xiaohongshu.com/new/note-manager"
+DEFAULT_SINGLE_PAPER_LOG_FULL = Path("/Users/ursula/Documents/Playground/daily_paper/xiaohongshu_single_paper_log_full.json")
+DEFAULT_SINGLE_PAPER_LOG_INDEX = Path("/Users/ursula/Documents/Playground/daily_paper/xiaohongshu_single_paper_dedup_index.json")
+LEGACY_SINGLE_PAPER_LOG = Path("/Users/ursula/Documents/Playground/daily_paper/xiaohongshu_single_paper_log.json")
 SAFARI_WINDOW_ID: Optional[int] = None
 GENERIC_TITLE_HINTS = (
     "解读",
@@ -28,6 +35,184 @@ DEFAULT_BODY_SETTLE_RANGE = (3.5, 7.5)
 DEFAULT_TITLE_SETTLE_RANGE = (2.0, 5.0)
 DEFAULT_PRE_PUBLISH_RANGE = (12.0, 28.0)
 DEFAULT_POST_PUBLISH_RANGE = (45.0, 90.0)
+
+
+def atomic_write_json(path: Path, payload: dict) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with tempfile.NamedTemporaryFile(
+        prefix=f".{path.name}.",
+        suffix=".tmp",
+        dir=path.parent,
+        delete=False,
+        mode="w",
+        encoding="utf-8",
+    ) as tmp:
+        json.dump(payload, tmp, ensure_ascii=False, indent=2)
+        tmp.write("\n")
+        tmp_path = Path(tmp.name)
+    tmp_path.replace(path)
+
+
+def load_json_file(path: Path) -> dict:
+    if not path.exists():
+        return {}
+    return json.loads(path.read_text(encoding="utf-8"))
+
+
+def normalize_lookup_key(text: str) -> str:
+    lowered = text.strip().lower().replace("：", ":")
+    lowered = re.sub(r"[^0-9a-z\u4e00-\u9fff]+", "", lowered)
+    return lowered
+
+
+def extract_method_name(xhs_title: str) -> str:
+    for sep in ("：", ":"):
+        if sep in xhs_title:
+            return xhs_title.split(sep, 1)[0].strip()
+    return xhs_title.strip()
+
+
+def summarize_log_entry(paper_title: str, entry: dict) -> dict:
+    return {
+        "paper_title": paper_title,
+        "status": entry.get("status"),
+        "xhs_title": entry.get("xhs_title"),
+        "xiaohongshu_link": entry.get("xiaohongshu_link"),
+        "note_id": entry.get("note_id"),
+        "markdown_path": entry.get("markdown_path"),
+        "cover_image": entry.get("cover_image"),
+        "teaser_image": entry.get("teaser_image"),
+        "source_group": entry.get("source_group"),
+        "post_type": entry.get("post_type"),
+    }
+
+
+def build_single_paper_dedup_index(full_log: dict) -> dict:
+    index = {
+        "generated_at": datetime.now(timezone.utc).isoformat(),
+        "entry_count": len(full_log),
+        "published_entry_count": 0,
+        "by_paper_title": {},
+        "published_by_paper_title": {},
+        "published_by_xhs_title": {},
+        "published_by_method_name": {},
+    }
+    for paper_title, entry in full_log.items():
+        summary = summarize_log_entry(paper_title, entry)
+        paper_key = normalize_lookup_key(paper_title)
+        index["by_paper_title"][paper_key] = summary
+        if entry.get("status") != "published":
+            continue
+        index["published_entry_count"] += 1
+        index["published_by_paper_title"][paper_key] = summary
+        xhs_title = entry.get("xhs_title") or ""
+        if xhs_title:
+            index["published_by_xhs_title"][normalize_lookup_key(xhs_title)] = summary
+            method_name = extract_method_name(xhs_title)
+            if method_name:
+                index["published_by_method_name"][normalize_lookup_key(method_name)] = summary
+    return index
+
+
+def ensure_single_paper_logs(full_log_path: Path, index_path: Path) -> tuple[dict, dict]:
+    full_log = load_json_file(full_log_path)
+    if not full_log and LEGACY_SINGLE_PAPER_LOG.exists():
+        full_log = load_json_file(LEGACY_SINGLE_PAPER_LOG)
+        atomic_write_json(full_log_path, full_log)
+    index = load_json_file(index_path)
+    if not index:
+        index = build_single_paper_dedup_index(full_log)
+        atomic_write_json(index_path, index)
+    return full_log, index
+
+
+def check_single_paper_duplicate(paper_title: str, full_log_path: Path, index_path: Path) -> dict | None:
+    _, index = ensure_single_paper_logs(full_log_path, index_path)
+    key = normalize_lookup_key(paper_title)
+    return index.get("published_by_paper_title", {}).get(key)
+
+
+def open_note_manager_page() -> str:
+    script = f'''
+tell application "Safari"
+  if not (exists {safari_window_clause()}) then error "Safari target window not found"
+  set URL of current tab of {safari_window_clause()} to "{NOTE_MANAGER_URL}"
+  delay 2
+  return URL of current tab of {safari_window_clause()}
+end tell
+'''
+    return run_osascript(script)
+
+
+def lookup_note_in_manager_by_title(xhs_title: str, timeout_sec: float = 12.0) -> dict:
+    deadline = time.time() + timeout_sec
+    while time.time() < deadline:
+        raw = safari_js(
+            f"""
+            (() => {{
+              const wanted = {json.dumps(xhs_title, ensure_ascii=False)};
+              const notes = Array.from(document.querySelectorAll('.note')).map(note => {{
+                const title = note.querySelector('.title')?.innerText?.trim() || '';
+                const raw = note.getAttribute('data-impression') || '';
+                const m = raw.match(/\\"noteId\\":\\"([^\\"]+)\\"/);
+                const time = note.querySelector('.time')?.innerText?.trim() || '';
+                return title && m ? {{ title, noteId: m[1], time }} : null;
+              }}).filter(Boolean);
+              const hit = notes.find(item => item.title === wanted);
+              return JSON.stringify({{ url: location.href, count: notes.length, hit, notes: notes.slice(0, 8) }});
+            }})();
+            """
+        )
+        status = json.loads(raw)
+        hit = status.get("hit")
+        if hit:
+            hit["xiaohongshu_link"] = f"https://www.xiaohongshu.com/explore/{hit['noteId']}"
+            return hit
+        time.sleep(0.8)
+    raise RuntimeError(f"Published note was not found in note manager: {xhs_title}")
+
+
+def register_single_paper_log(
+    *,
+    paper_title: str,
+    xhs_title: str,
+    markdown_path: str | None,
+    cover_image: str | None,
+    teaser_image: str | None,
+    final_url: str,
+    full_log_path: Path,
+    index_path: Path,
+) -> dict:
+    full_log, _ = ensure_single_paper_logs(full_log_path, index_path)
+    open_note_manager_page()
+    note = lookup_note_in_manager_by_title(xhs_title)
+    source_group = ""
+    if markdown_path:
+        md = Path(markdown_path)
+        try:
+            source_group = str(md.parent.relative_to(Path("/Users/ursula/Documents/Playground/daily_paper")))
+        except Exception:
+            source_group = str(md.parent)
+    entry = dict(full_log.get(paper_title, {}))
+    entry.update(
+        {
+            "status": "published",
+            "xhs_title": xhs_title,
+            "xiaohongshu_link": note.get("xiaohongshu_link"),
+            "note_id": note.get("noteId"),
+            "markdown_path": markdown_path,
+            "cover_image": cover_image,
+            "teaser_image": teaser_image,
+            "source_group": source_group or entry.get("source_group"),
+            "post_type": "single_paper_analysis",
+            "publish_url": final_url,
+            "updated_at": datetime.now(timezone.utc).isoformat(),
+        }
+    )
+    full_log[paper_title] = entry
+    atomic_write_json(full_log_path, full_log)
+    atomic_write_json(index_path, build_single_paper_dedup_index(full_log))
+    return entry
 
 
 def run_osascript(script: str) -> str:
@@ -677,9 +862,13 @@ def main() -> int:
     parser.add_argument("--body")
     parser.add_argument("--body-file")
     parser.add_argument("--markdown")
+    parser.add_argument("--post-type", choices=["generic", "overview", "single_paper_analysis"], default="generic")
+    parser.add_argument("--paper-title")
     parser.add_argument("--cover")
     parser.add_argument("--extra-image", action="append", default=[])
     parser.add_argument("--cover-text")
+    parser.add_argument("--single-paper-log-full", default=str(DEFAULT_SINGLE_PAPER_LOG_FULL))
+    parser.add_argument("--single-paper-log-index", default=str(DEFAULT_SINGLE_PAPER_LOG_INDEX))
     parser.add_argument("--window-id", type=int)
     parser.add_argument("--print-window-id", action="store_true")
     parser.add_argument("--preview-shot")
@@ -705,6 +894,17 @@ def main() -> int:
     if not cover and not args.cover_text:
         raise ValueError("Provide --cover for a normal post or --cover-text for a text-generated weekly cover")
     validate_inputs(title, body, cover)
+    full_log_path = Path(args.single_paper_log_full).expanduser().resolve()
+    index_path = Path(args.single_paper_log_index).expanduser().resolve()
+    if args.post_type == "single_paper_analysis":
+        if not args.paper_title:
+            raise ValueError("--paper-title is required for --post-type single_paper_analysis")
+        duplicate = check_single_paper_duplicate(args.paper_title, full_log_path, index_path)
+        if duplicate:
+            raise RuntimeError(
+                f"Single-paper post already published for '{args.paper_title}': "
+                f"{duplicate.get('xhs_title')} {duplicate.get('xiaohongshu_link') or ''}".strip()
+            )
 
     open_publish_page()
     expect_logged_in()
@@ -742,6 +942,18 @@ def main() -> int:
     pre_publish_wait = wait_with_jitter(args.pre_publish_min, args.pre_publish_max)
     click_publish()
     final_url = verify_published()
+    log_entry = None
+    if args.post_type == "single_paper_analysis":
+        log_entry = register_single_paper_log(
+            paper_title=args.paper_title,
+            xhs_title=title,
+            markdown_path=args.markdown,
+            cover_image=str(cover) if cover else None,
+            teaser_image=args.extra_image[0] if args.extra_image else None,
+            final_url=final_url,
+            full_log_path=full_log_path,
+            index_path=index_path,
+        )
     post_publish_wait = wait_with_jitter(args.post_publish_min, args.post_publish_max)
     print(
         json.dumps(
@@ -755,6 +967,7 @@ def main() -> int:
                     "pre_publish_sec": round(pre_publish_wait, 2),
                     "post_publish_sec": round(post_publish_wait, 2),
                 },
+                "log_entry": log_entry,
             },
             ensure_ascii=False,
         )

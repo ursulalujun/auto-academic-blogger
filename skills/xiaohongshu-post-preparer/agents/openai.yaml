@@ -1,0 +1,4 @@
+interface:
+  display_name: "Xiaohongshu Post Preparer"
+  short_description: "Draft Xiaohongshu posts and prepare images before publishing"
+  default_prompt: "Use $xiaohongshu-post-preparer to prepare a Xiaohongshu post before publishing. Decide whether it is an overview post or a single-paper analysis post, draft the markdown, keep title <= 20 chars and body <= 1000 chars, add #topic tags, and prepare image assets. For overview posts, use text-cover mode plus arXiv PDF first-page screenshots for each paper. For single-paper posts, prefer the Hugging Face paper cover; if unavailable, use the arXiv PDF first page; add a teaser/framework image only when the first page does not already include a clear teaser."
