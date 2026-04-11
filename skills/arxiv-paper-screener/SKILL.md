@@ -12,11 +12,12 @@ Use this skill when the user wants to search arXiv for a field and a recent time
 Normalize the user request into two required parameters:
 
 - `field`: a field name such as `spatial intelligence`, `agent`, `world model`
-- `window`: a recent time window such as `7d`, `14d`, `30d`, `90d`, or a Chinese phrase like `一个月以内`
+- `window`: a recent time window such as `7d`, `14d`, `30d`, `90d`, a Chinese phrase like `一个月以内`, or a specific month such as `2026-03`, `2026年3月`, `三月份`
 
 Optional parameters:
 
 - `max_results`: how many arXiv candidates to fetch before filtering, default `100`
+- `limit`: maximum number of ranked papers to keep in outputs, default `20`
 - `outdir`: where to write outputs; default to a subfolder under `/Users/ursula/Documents/Playground/arxiv_search`
 
 ## Workflow
@@ -26,8 +27,9 @@ Optional parameters:
 3. Filter papers to the requested time window on the client side.
 4. Enrich each paper with:
    - institutions and citation count from OpenAlex
+   - if OpenAlex does not provide institution metadata, read the arXiv PDF first page and infer the first institution from the author-affiliation block
    - GitHub repository link and star count when code is available
-5. Filter out papers whose author institutions are not in the allowlist file:
+5. Filter out papers whose first institution is not in the allowlist file:
    - global `qs100_universities_snapshot`
    - global `major_ai_and_internet_companies`
    - the field-specific institutions for the current field
@@ -37,11 +39,15 @@ Optional parameters:
 7. Write both:
    - a machine-readable `results.json`
    - a readable `results.md`
+   - write to temporary files first, then atomically replace the final outputs so readers never see half-updated results
 
 ## Important Notes
 
 - arXiv itself does not provide a stable public per-paper citation metric in the paper metadata API. For the no-code fallback ranking, use OpenAlex `cited_by_count`.
-- arXiv metadata does not reliably expose author affiliations. Institution filtering in this skill depends on OpenAlex authorship/institution metadata.
+- arXiv metadata does not reliably expose author affiliations. Institution filtering first uses OpenAlex authorship/institution metadata, then falls back to reading the PDF first page when institution metadata is missing.
+- Only the first institution is used for filtering and matching. Later institutions on the paper are ignored.
+- The PDF fallback is conservative: it scans the first page front matter and tries to identify the earliest allowlisted institution mention before `Abstract` or `Introduction`.
+- Output files should be replaced atomically. Do not stream partial results into the final `results.json` or `results.md` paths while a long screening run is still in progress.
 - The institution allowlists are conservative by design. Papers from institutions outside the allowlist are filtered out even if they may still be good.
 - Treat `references/institution_allowlists.json` as a curated snapshot. Update it periodically.
 
@@ -78,7 +84,8 @@ The markdown output should include:
 ```bash
 python3 /Users/ursula/.codex/skills/arxiv-paper-screener/scripts/search_and_rank_arxiv.py \
   --field "spatial intelligence" \
-  --window "30d" \
+  --window "2026-03" \
+  --limit 20 \
   --outdir /Users/ursula/Documents/Playground/arxiv_search
 ```
 

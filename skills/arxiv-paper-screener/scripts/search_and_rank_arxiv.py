@@ -3,13 +3,20 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import re
+import tempfile
 import time
 import urllib.parse
 import urllib.request
 import xml.etree.ElementTree as ET
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
+
+try:
+    from pypdf import PdfReader
+except Exception:
+    PdfReader = None
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -55,6 +62,35 @@ def parse_window(value: str) -> int:
     if raw.endswith("个月") and raw[:-2].isdigit():
         return int(raw[:-2]) * 30
     raise ValueError(f"Unsupported window format: {value}")
+
+
+def parse_time_filter(value: str) -> dict:
+    raw = value.strip()
+    lower = raw.lower()
+    month_match = re.fullmatch(r"(\d{4})-(\d{2})", lower)
+    if month_match:
+        year = int(month_match.group(1))
+        month = int(month_match.group(2))
+        return {"mode": "month", "year": year, "month": month}
+
+    cn_month_match = re.fullmatch(r"(\d{4})年(\d{1,2})月", raw)
+    if cn_month_match:
+        year = int(cn_month_match.group(1))
+        month = int(cn_month_match.group(2))
+        return {"mode": "month", "year": year, "month": month}
+
+    march_aliases = {
+        "三月": (2026, 3),
+        "三月份": (2026, 3),
+        "2026年三月": (2026, 3),
+        "march 2026": (2026, 3),
+        "march": (2026, 3),
+    }
+    if lower in march_aliases:
+        year, month = march_aliases[lower]
+        return {"mode": "month", "year": year, "month": month}
+
+    return {"mode": "window_days", "days": parse_window(raw)}
 
 
 def resolve_field(field: str) -> tuple[str, dict]:
@@ -123,11 +159,38 @@ def within_days(date_text: str, days: int) -> bool:
     return published >= cutoff
 
 
+def within_month(date_text: str, year: int, month: int) -> bool:
+    if not date_text:
+        return False
+    published = datetime.fromisoformat(date_text.replace("Z", "+00:00"))
+    return published.year == year and published.month == month
+
+
+def paper_in_time_filter(date_text: str, time_filter: dict) -> bool:
+    if time_filter["mode"] == "window_days":
+        return within_days(date_text, time_filter["days"])
+    if time_filter["mode"] == "month":
+        return within_month(date_text, time_filter["year"], time_filter["month"])
+    raise ValueError(f"Unsupported time filter mode: {time_filter['mode']}")
+
+
 def normalize_name(text: str) -> str:
     text = text.lower()
     text = text.replace("&", " and ")
     text = re.sub(r"[^a-z0-9]+", " ", text)
     return re.sub(r"\s+", " ", text).strip()
+
+
+def token_sequence_index(haystack: str, needle: str) -> int:
+    hay_tokens = normalize_name(haystack).split()
+    needle_tokens = normalize_name(needle).split()
+    if not hay_tokens or not needle_tokens or len(needle_tokens) > len(hay_tokens):
+        return -1
+    width = len(needle_tokens)
+    for idx in range(len(hay_tokens) - width + 1):
+        if hay_tokens[idx: idx + width] == needle_tokens:
+            return idx
+    return -1
 
 
 def fetch_openalex_record(title: str, arxiv_id: str) -> dict:
@@ -162,17 +225,97 @@ def fetch_openalex_record(title: str, arxiv_id: str) -> dict:
         return {}
     institutions = []
     raw_affiliations = []
+    primary_institution = ""
+    primary_raw_affiliation = ""
     for authorship in best.get("authorships", []) or []:
         for institution in authorship.get("institutions", []) or []:
             name = institution.get("display_name")
             if name:
+                if not primary_institution:
+                    primary_institution = name
                 institutions.append(name)
         for raw in authorship.get("raw_affiliation_strings", []) or []:
             if raw:
+                if not primary_raw_affiliation:
+                    primary_raw_affiliation = raw
                 raw_affiliations.append(raw)
     best["_institutions"] = sorted(set(institutions))
     best["_raw_affiliations"] = sorted(set(raw_affiliations))
+    best["_primary_institution"] = primary_institution
+    best["_primary_raw_affiliation"] = primary_raw_affiliation
     return best
+
+
+def extract_pdf_first_page_text(pdf_url: str) -> str:
+    if PdfReader is None or not pdf_url:
+        return ""
+    tmp_path = None
+    try:
+        with tempfile.NamedTemporaryFile(prefix="arxiv-paper-", suffix=".pdf", delete=False) as tmp:
+            tmp.write(http_get(pdf_url, accept="application/pdf"))
+            tmp_path = tmp.name
+        reader = PdfReader(tmp_path)
+        if not reader.pages:
+            return ""
+        text = reader.pages[0].extract_text() or ""
+        return re.sub(r"\s+\n", "\n", text).strip()
+    except Exception:
+        return ""
+    finally:
+        if tmp_path:
+            try:
+                os.unlink(tmp_path)
+            except OSError:
+                pass
+
+
+def pdf_front_matter(text: str) -> str:
+    if not text:
+        return ""
+    stop_markers = [
+        "\nabstract",
+        "\n摘要",
+        "\n1 introduction",
+        "\n1. introduction",
+        "\nintroduction",
+    ]
+    lowered = text.lower()
+    cut = len(text)
+    for marker in stop_markers:
+        idx = lowered.find(marker)
+        if idx != -1:
+            cut = min(cut, idx)
+    front = text[:cut]
+    lines = [re.sub(r"\s+", " ", line).strip() for line in front.splitlines()]
+    lines = [line for line in lines if line]
+    return "\n".join(lines)
+
+
+def find_line_containing(text: str, needle: str) -> str:
+    if not text or not needle:
+        return ""
+    for line in text.splitlines():
+        if token_sequence_index(line, needle) != -1:
+            return line.strip()
+    return ""
+
+
+def infer_primary_institution_from_pdf(pdf_url: str, allowlist: list[str]) -> tuple[str, str]:
+    front = pdf_front_matter(extract_pdf_first_page_text(pdf_url))
+    if not front:
+        return "", ""
+    earliest_match = None
+    for allowed in allowlist:
+        pos = token_sequence_index(front, allowed)
+        if pos == -1:
+            continue
+        if earliest_match is None or pos < earliest_match[0] or (pos == earliest_match[0] and len(allowed) > len(earliest_match[1])):
+            earliest_match = (pos, allowed)
+    if not earliest_match:
+        return "", ""
+    institution = earliest_match[1]
+    raw_affiliation = find_line_containing(front, institution)
+    return institution, raw_affiliation
 
 
 GITHUB_RE = re.compile(r"https?://github\.com/([A-Za-z0-9_.-]+)/([A-Za-z0-9_.-]+)")
@@ -218,9 +361,9 @@ def allowed_institution_names(field_key: str) -> list[str]:
     return sorted(set(names))
 
 
-def institution_allowed(candidate_names: list[str], raw_affiliations: list[str], allowlist: list[str]) -> bool:
+def institution_allowed(primary_name: str, primary_raw_affiliation: str, allowlist: list[str]) -> bool:
     normalized_allow = [normalize_name(name) for name in allowlist]
-    haystacks = [normalize_name(name) for name in candidate_names + raw_affiliations if name]
+    haystacks = [normalize_name(name) for name in [primary_name, primary_raw_affiliation] if name]
     for hay in haystacks:
         for allowed in normalized_allow:
             if allowed and (allowed in hay or hay in allowed):
@@ -236,16 +379,34 @@ def ranking_metric(paper: dict) -> tuple[int, str]:
     return int(citations), "citation_count"
 
 
+def atomic_write_text(path: Path, content: str) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with tempfile.NamedTemporaryFile(
+        prefix=f".{path.name}.",
+        suffix=".tmp",
+        dir=path.parent,
+        delete=False,
+        mode="w",
+        encoding="utf-8",
+    ) as tmp:
+        tmp.write(content)
+        tmp_path = Path(tmp.name)
+    tmp_path.replace(path)
+
+
 def write_outputs(outdir: Path, metadata: dict, papers: list[dict]) -> None:
     outdir.mkdir(parents=True, exist_ok=True)
     payload = {"metadata": metadata, "papers": papers}
-    (outdir / "results.json").write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    atomic_write_text(
+        outdir / "results.json",
+        json.dumps(payload, ensure_ascii=False, indent=2) + "\n",
+    )
 
     lines = [
         "# arXiv Paper Screening Results",
         "",
         f"- field: {metadata['field']}",
-        f"- window_days: {metadata['window_days']}",
+        f"- time_filter: {metadata['time_filter_label']}",
         f"- arxiv_candidates: {metadata['arxiv_candidates']}",
         f"- filtered_papers: {len(papers)}",
         f"- ranking_rule: code papers use GitHub stars; non-code papers use citation count",
@@ -255,13 +416,13 @@ def write_outputs(outdir: Path, metadata: dict, papers: list[dict]) -> None:
     ]
     for idx, paper in enumerate(papers, start=1):
         metric_value, metric_name = ranking_metric(paper)
-        institutions = "; ".join(paper.get("institutions", [])[:4])
+        institutions = paper.get("primary_institution") or "; ".join(paper.get("institutions", [])[:4])
         code = paper.get("github_repo") or "-"
         lines.append(
             f"| {idx} | {paper['title']} | {paper['published'][:10]} | {institutions} | {code} | "
             f"{paper.get('github_stars', '-')} | {paper.get('citation_count', 0)} | {metric_name}:{metric_value} | {paper['arxiv_url']} |"
         )
-    (outdir / "results.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
+    atomic_write_text(outdir / "results.md", "\n".join(lines) + "\n")
 
 
 def main() -> int:
@@ -269,21 +430,33 @@ def main() -> int:
     parser.add_argument("--field", required=True)
     parser.add_argument("--window", required=True, help="Examples: 7d, 30d, 90d, 一个月以内")
     parser.add_argument("--max-results", type=int, default=100)
+    parser.add_argument("--limit", type=int, default=20, help="Maximum number of ranked papers to keep in outputs")
     parser.add_argument("--outdir", default="/Users/ursula/Documents/Playground/arxiv_search")
     args = parser.parse_args()
 
     field_key, profile = resolve_field(args.field)
-    window_days = parse_window(args.window)
+    time_filter = parse_time_filter(args.window)
     allowlist = allowed_institution_names(profile.get("field_institutions_key", field_key))
     candidates = search_arxiv(profile["keywords"], max_results=args.max_results)
-    recent = [paper for paper in candidates if within_days(paper["published"], window_days)]
+    recent = [paper for paper in candidates if paper_in_time_filter(paper["published"], time_filter)]
 
     filtered = []
     for paper in recent:
         openalex = fetch_openalex_record(paper["title"], paper["arxiv_id"])
         institutions = openalex.get("_institutions", [])
         raw_affiliations = openalex.get("_raw_affiliations", [])
-        if not institution_allowed(institutions, raw_affiliations, allowlist):
+        primary_institution = openalex.get("_primary_institution", "")
+        primary_raw_affiliation = openalex.get("_primary_raw_affiliation", "")
+        institution_source = "openalex" if primary_institution or primary_raw_affiliation else ""
+        if not primary_institution and not primary_raw_affiliation:
+            pdf_primary, pdf_raw = infer_primary_institution_from_pdf(paper["pdf_url"], allowlist)
+            if pdf_primary or pdf_raw:
+                primary_institution = pdf_primary
+                primary_raw_affiliation = pdf_raw
+                institutions = [pdf_primary] if pdf_primary else institutions
+                raw_affiliations = [pdf_raw] if pdf_raw else raw_affiliations
+                institution_source = "pdf_first_page"
+        if not institution_allowed(primary_institution, primary_raw_affiliation, allowlist):
             continue
         github_repo = find_github_repo(paper["arxiv_url"])
         github_stars = fetch_github_stars(github_repo) if github_repo else None
@@ -295,6 +468,9 @@ def main() -> int:
             **paper,
             "institutions": institutions,
             "raw_affiliations": raw_affiliations,
+            "primary_institution": primary_institution,
+            "primary_raw_affiliation": primary_raw_affiliation,
+            "institution_source": institution_source or "unknown",
             "github_repo": github_repo,
             "github_stars": github_stars,
             "citation_count": citation_count,
@@ -305,12 +481,20 @@ def main() -> int:
         time.sleep(0.2)
 
     filtered.sort(key=lambda item: (item["github_stars"] is None, -item["ranking_value"], item["published"]), reverse=False)
-    outdir = Path(args.outdir).expanduser().resolve() / f"{slugify(field_key)}_{window_days}d"
+    filtered = filtered[: max(1, args.limit)]
+    if time_filter["mode"] == "window_days":
+        time_filter_label = f"{time_filter['days']}d"
+        suffix = f"{time_filter['days']}d"
+    else:
+        time_filter_label = f"{time_filter['year']}-{time_filter['month']:02d}"
+        suffix = time_filter_label
+    outdir = Path(args.outdir).expanduser().resolve() / f"{slugify(field_key)}_{suffix}"
     write_outputs(
         outdir,
         metadata={
             "field": field_key,
-            "window_days": window_days,
+            "time_filter": time_filter,
+            "time_filter_label": time_filter_label,
             "arxiv_candidates": len(candidates),
             "profile_keywords": profile["keywords"],
         },
@@ -321,7 +505,7 @@ def main() -> int:
             {
                 "ok": True,
                 "field": field_key,
-                "window_days": window_days,
+                "time_filter": time_filter,
                 "arxiv_candidates": len(candidates),
                 "filtered_papers": len(filtered),
                 "outdir": str(outdir),
