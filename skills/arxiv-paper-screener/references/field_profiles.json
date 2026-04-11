@@ -1,0 +1,44 @@
+{
+  "spatial intelligence": {
+    "keywords": [
+      "spatial intelligence",
+      "3d scene understanding",
+      "3d perception",
+      "multi-view",
+      "spatial reasoning",
+      "embodied spatial reasoning",
+      "3d reconstruction",
+      "gaussian splatting",
+      "viewpoint understanding"
+    ],
+    "field_institutions_key": "spatial intelligence"
+  },
+  "agent": {
+    "keywords": [
+      "llm agent",
+      "agentic",
+      "tool use",
+      "web agent",
+      "computer use agent",
+      "multi-agent",
+      "agent memory",
+      "agent planning",
+      "mobile agent"
+    ],
+    "field_institutions_key": "agent"
+  },
+  "world model": {
+    "keywords": [
+      "world model",
+      "world action model",
+      "world simulator",
+      "video world model",
+      "embodied world model",
+      "future prediction",
+      "interactive world model",
+      "generative world model"
+    ],
+    "field_institutions_key": "world model"
+  }
+}
+

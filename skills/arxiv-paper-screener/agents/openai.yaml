@@ -1,0 +1,5 @@
+interface:
+  display_name: "arXiv Screener"
+  short_description: "Search and rank recent arXiv papers by field"
+  default_prompt: "Use $arxiv-paper-screener to search arXiv for field spatial intelligence within 30 days, filter papers by top universities, major AI companies, and field-specific institutions, then rank open-source papers by GitHub stars and non-open-source papers by citation count. Write markdown and json outputs to /Users/ursula/Documents/Playground/arxiv_search."
+
