@@ -18,9 +18,14 @@ from typing import Optional
 
 PUBLISH_URL = "https://creator.xiaohongshu.com/publish/publish"
 NOTE_MANAGER_URL = "https://creator.xiaohongshu.com/new/note-manager"
-DEFAULT_SINGLE_PAPER_LOG_FULL = Path("/Users/ursula/Documents/Playground/daily_paper/xiaohongshu_single_paper_log_full.json")
-DEFAULT_SINGLE_PAPER_LOG_INDEX = Path("/Users/ursula/Documents/Playground/daily_paper/xiaohongshu_single_paper_dedup_index.json")
-LEGACY_SINGLE_PAPER_LOG = Path("/Users/ursula/Documents/Playground/daily_paper/xiaohongshu_single_paper_log.json")
+REPO_ROOT = Path(__file__).resolve().parents[3]
+DAILY_PAPER_ROOT = REPO_ROOT / "daily_paper"
+DEFAULT_SINGLE_PAPER_LOG_FULL = DAILY_PAPER_ROOT / "xiaohongshu_single_paper_log_full.json"
+DEFAULT_SINGLE_PAPER_LOG_INDEX = DAILY_PAPER_ROOT / "xiaohongshu_single_paper_dedup_index.json"
+LEGACY_SINGLE_PAPER_LOG = DAILY_PAPER_ROOT / "xiaohongshu_single_paper_log.json"
+SNIPASTE_CAPTURE_SCRIPT = (
+    Path.home() / ".codex" / "skills" / "snipaste-window-screenshot" / "scripts" / "capture_window.py"
+)
 SAFARI_WINDOW_ID: Optional[int] = None
 GENERIC_TITLE_HINTS = (
     "解读",
@@ -190,7 +195,7 @@ def register_single_paper_log(
     if markdown_path:
         md = Path(markdown_path)
         try:
-            source_group = str(md.parent.relative_to(Path("/Users/ursula/Documents/Playground/daily_paper")))
+            source_group = str(md.parent.relative_to(DAILY_PAPER_ROOT))
         except Exception:
             source_group = str(md.parent)
     entry = dict(full_log.get(paper_title, {}))
@@ -357,11 +362,10 @@ def validate_inputs(title: str, body: str, cover: Optional[Path]) -> None:
 def capture_preview_screenshot(preview_path: Path) -> Path:
     if SAFARI_WINDOW_ID is None:
         raise ValueError("Preview screenshot capture requires --window-id so the correct Safari window stays pinned.")
-    script = "/Users/ursula/.codex/skills/snipaste-window-screenshot/scripts/capture_window.py"
     subprocess.run(
         [
             "python3",
-            script,
+            str(SNIPASTE_CAPTURE_SCRIPT),
             "--app",
             "Safari",
             "--window-id",

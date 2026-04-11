@@ -43,7 +43,7 @@ ln -sfn /path/to/auto-academic-blogger/skills/xiaohongshu-image-note-publisher ~
 By default, the workflows in this repo expect generated files under a local workspace such as:
 
 ```text
-/Users/<you>/Documents/Playground/daily_paper
+./daily_paper
 ```
 
 If you use a different workspace root, adjust the output paths in your prompts or scripts.

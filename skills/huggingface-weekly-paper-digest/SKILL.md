@@ -20,27 +20,27 @@ The skill accepts two parameters:
 3. Ensure every theme section includes a non-empty `Summary` block that synthesizes recurring motivation, method patterns, and shared novelty across the papers in that theme. Do not leave placeholder text.
 4. Ensure the highest-upvoted paper in every theme has a standalone markdown file with non-empty `Motivation`, `Method`, and `Insights` sections. Do not leave placeholder text.
 5. Keep one paper in one primary theme only. If a paper spans multiple themes, place it in the theme that best matches its main contribution.
-6. Unless the user explicitly says not to write files, always deliver the result under `/Users/ursula/Documents/Playground/daily_paper/2026-W{wid}`. Do not invent alternative output locations unless the user explicitly overrides the path.
+6. Unless the user explicitly says not to write files, always deliver the result under `./daily_paper/2026-W{wid}`. Do not invent alternative output locations unless the user explicitly overrides the path.
 
 ## Quick Start
 
 Run the helper script and write to the normalized weekly folder path:
 
 ```bash
-python3 /Users/ursula/.codex/skills/huggingface-weekly-paper-digest/scripts/build_weekly_digest.py \
+python3 ./skills/huggingface-weekly-paper-digest/scripts/build_weekly_digest.py \
   --wid W12 \
   --themes "spatial intelligence" "world model" "video understanding" "tool-use agent" \
-  --outdir /Users/ursula/Documents/Playground/daily_paper
+  --outdir ./daily_paper
 ```
 
 This creates:
 
-- `/Users/ursula/Documents/Playground/daily_paper/2026-W12/2026-W12.md`: themed main digest markdown
-- `/Users/ursula/Documents/Playground/daily_paper/2026-W12/papers.json`: normalized paper metadata
-- `/Users/ursula/Documents/Playground/daily_paper/2026-W12/artifacts.json`: output manifest
-- `/Users/ursula/Documents/Playground/daily_paper/2026-W12/<Top Paper Title>.md`: one top-paper note per theme
+- `./daily_paper/2026-W12/2026-W12.md`: themed main digest markdown
+- `./daily_paper/2026-W12/papers.json`: normalized paper metadata
+- `./daily_paper/2026-W12/artifacts.json`: output manifest
+- `./daily_paper/2026-W12/<Top Paper Title>.md`: one top-paper note per theme
 
-These files are not optional. If the user asks for the weekly digest, the expected deliverable is the full weekly folder under `/Users/ursula/Documents/Playground/daily_paper`, with the main markdown plus one standalone top-paper markdown per theme, unless the user explicitly narrows the request.
+These files are not optional. If the user asks for the weekly digest, the expected deliverable is the full weekly folder under `./daily_paper`, with the main markdown plus one standalone top-paper markdown per theme, unless the user explicitly narrows the request.
 
 ## Theme Handling
 
@@ -64,7 +64,7 @@ For custom themes:
 - Include a homepage or method image in `summary` when an arXiv HTML figure is available. If no figure is available, keep the summary text-only.
 - Use the weekly source link format: `https://huggingface.co/papers/week/<year-week>`.
 - Do not stop after producing only the table. A complete run must include: the themed table markdown, one `Summary` block per theme, and one standalone top-paper markdown per theme.
-- By default, place every weekly digest under `/Users/ursula/Documents/Playground/daily_paper/2026-W{wid}`.
+- By default, place every weekly digest under `./daily_paper/2026-W{wid}`.
 - If any generated output is missing a theme `Summary` or a top-paper analysis file, add it manually before finishing.
 
 ## Resources

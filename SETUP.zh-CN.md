@@ -43,7 +43,7 @@ ln -sfn /path/to/auto-academic-blogger/skills/xiaohongshu-image-note-publisher ~
 这个仓库默认把生成结果放在类似下面的工作目录里：
 
 ```text
-/Users/<you>/Documents/Playground/daily_paper
+./daily_paper
 ```
 
 如果你使用别的目录结构，可以在 prompt 或脚本参数里改掉输出路径。

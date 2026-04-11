@@ -431,7 +431,7 @@ def main() -> int:
     parser.add_argument("--window", required=True, help="Examples: 7d, 30d, 90d, 一个月以内")
     parser.add_argument("--max-results", type=int, default=100)
     parser.add_argument("--limit", type=int, default=20, help="Maximum number of ranked papers to keep in outputs")
-    parser.add_argument("--outdir", default="/Users/ursula/Documents/Playground/arxiv_search")
+    parser.add_argument("--outdir", default=str(DEFAULT_OUTDIR))
     args = parser.parse_args()
 
     field_key, profile = resolve_field(args.field)
@@ -518,3 +518,5 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
+REPO_ROOT = Path(__file__).resolve().parents[3]
+DEFAULT_OUTDIR = REPO_ROOT / "daily_paper" / "arxiv_search"

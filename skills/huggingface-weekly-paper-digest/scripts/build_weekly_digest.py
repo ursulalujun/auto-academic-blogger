@@ -481,7 +481,7 @@ def main() -> int:
     parser = argparse.ArgumentParser(description="Build a weekly Hugging Face papers digest scaffold.")
     parser.add_argument("--wid", required=True, help="Week id, e.g. W12, 12, or 2026-W12")
     parser.add_argument("--themes", required=True, nargs="+", help="Theme names or name=kw1,kw2 entries")
-    parser.add_argument("--outdir", default="/Users/ursula/Documents/Playground/daily_paper", help="Output parent directory")
+    parser.add_argument("--outdir", default=str(DEFAULT_OUTDIR), help="Output parent directory")
     args = parser.parse_args()
 
     week_label, year, week = parse_wid(args.wid)
@@ -561,3 +561,5 @@ def main() -> int:
 
 if __name__ == "__main__":
     sys.exit(main())
+REPO_ROOT = Path(__file__).resolve().parents[3]
+DEFAULT_OUTDIR = REPO_ROOT / "daily_paper"

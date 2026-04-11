@@ -15,7 +15,7 @@ This skill is only for the final publish step.
 - rendering arXiv first pages
 - cropping teaser/framework figures
 
-should be done first with [$xiaohongshu-post-preparer](/Users/ursula/Documents/Playground/academic_blogger/skills/xiaohongshu-post-preparer/SKILL.md).
+should be done first with [$xiaohongshu-post-preparer](../xiaohongshu-post-preparer/SKILL.md).
 
 ## Preconditions
 
@@ -59,7 +59,7 @@ Typical prepared inputs:
 
 ## Single-Paper Log Rules
 
-For `单篇论文解析帖`, this skill must use the split log files under `/Users/ursula/Documents/Playground/daily_paper/`:
+For `单篇论文解析帖`, this skill must use the split log files under `./daily_paper/`:
 
 - full registry: `xiaohongshu_single_paper_log_full.json`
 - dedupe index: `xiaohongshu_single_paper_dedup_index.json`
@@ -106,7 +106,7 @@ After publishing a single-paper post:
 
 - Do not use Safari WebDriver, GUI coordinate clicking, or accessibility-tree-only control for this skill. Those were exploratory paths and are not part of the final workflow.
 - In multi-monitor setups, prefer locking to a specific Safari window id:
-  - Get it with `python3 /Users/ursula/.codex/skills/xiaohongshu-image-note-publisher/scripts/publish_image_note.py --print-window-id`
+  - Get it with `python3 ./skills/xiaohongshu-image-note-publisher/scripts/publish_image_note.py --print-window-id`
   - Reuse it with `--window-id <ID>` for all later publish actions
   - This avoids drifting back to a different Safari window or screen when multiple windows are open.
 
@@ -115,17 +115,17 @@ After publishing a single-paper post:
 Direct fields:
 
 ```bash
-python3 /Users/ursula/.codex/skills/xiaohongshu-image-note-publisher/scripts/publish_image_note.py \
+python3 ./skills/xiaohongshu-image-note-publisher/scripts/publish_image_note.py \
   --title "HF W13论文周报：四方向速览" \
   --body-file /tmp/xhs_body.txt \
-  --cover /Users/ursula/Documents/Playground/daily_paper/2026-W13/covers/weekly_cover.png
+  --cover ./daily_paper/2026-W13/covers/weekly_cover.png
 ```
 
 Markdown source:
 
 ```bash
-python3 /Users/ursula/.codex/skills/xiaohongshu-image-note-publisher/scripts/publish_image_note.py \
-  --markdown /Users/ursula/Documents/Playground/daily_paper/2026-W13/2026-W13_小红书贴文草稿.md \
+python3 ./skills/xiaohongshu-image-note-publisher/scripts/publish_image_note.py \
+  --markdown ./daily_paper/2026-W13/2026-W13_小红书贴文草稿.md \
   --title "HF W13论文周报：四方向速览" \
   --window-id 17400
 ```
@@ -133,8 +133,8 @@ python3 /Users/ursula/.codex/skills/xiaohongshu-image-note-publisher/scripts/pub
 Weekly summary with text-generated cover:
 
 ```bash
-python3 /Users/ursula/.codex/skills/xiaohongshu-image-note-publisher/scripts/publish_image_note.py \
-  --markdown /Users/ursula/Documents/Playground/daily_paper/2026-W13/2026-W13_小红书贴文草稿.md \
+python3 ./skills/xiaohongshu-image-note-publisher/scripts/publish_image_note.py \
+  --markdown ./daily_paper/2026-W13/2026-W13_小红书贴文草稿.md \
   --title "HF W13论文周报：四方向速览" \
   --cover-text "第13周huggingface daily paper小结" \
   --window-id 17400
@@ -143,7 +143,7 @@ python3 /Users/ursula/.codex/skills/xiaohongshu-image-note-publisher/scripts/pub
 Publish a prepared single-paper note:
 
 ```bash
-python3 /Users/ursula/.codex/skills/xiaohongshu-image-note-publisher/scripts/publish_image_note.py \
+python3 ./skills/xiaohongshu-image-note-publisher/scripts/publish_image_note.py \
   --title "HyDRA：让世界模型记住离屏目标" \
   --post-type single_paper_analysis \
   --paper-title "Out of Sight but Not Out of Mind" \
@@ -196,4 +196,4 @@ After clicking `发布`:
 
 Use this helper script for the end-to-end Safari publishing flow, single-paper duplicate checking, and post-publish log registration.
 
-All drafting and asset-preparation helpers now belong to [$xiaohongshu-post-preparer](/Users/ursula/Documents/Playground/academic_blogger/skills/xiaohongshu-post-preparer/SKILL.md).
+All drafting and asset-preparation helpers now belong to [$xiaohongshu-post-preparer](../xiaohongshu-post-preparer/SKILL.md).

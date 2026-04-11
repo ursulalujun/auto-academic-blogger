@@ -18,7 +18,7 @@ Optional parameters:
 
 - `max_results`: how many arXiv candidates to fetch before filtering, default `100`
 - `limit`: maximum number of ranked papers to keep in outputs, default `20`
-- `outdir`: where to write outputs; default to a subfolder under `/Users/ursula/Documents/Playground/arxiv_search`
+- `outdir`: where to write outputs; default to a subfolder under `./daily_paper/arxiv_search`
 
 ## Workflow
 
@@ -55,7 +55,7 @@ Optional parameters:
 
 Prefer writing outputs to:
 
-`/Users/ursula/Documents/Playground/arxiv_search/<field-slug>_<window>/`
+`./daily_paper/arxiv_search/<field-slug>_<window>/`
 
 The markdown output should include:
 
@@ -82,11 +82,11 @@ The markdown output should include:
 ## Quick Start
 
 ```bash
-python3 /Users/ursula/.codex/skills/arxiv-paper-screener/scripts/search_and_rank_arxiv.py \
+python3 ./skills/arxiv-paper-screener/scripts/search_and_rank_arxiv.py \
   --field "spatial intelligence" \
   --window "2026-03" \
   --limit 20 \
-  --outdir /Users/ursula/Documents/Playground/arxiv_search
+  --outdir ./daily_paper/arxiv_search
 ```
 
 ## Validation

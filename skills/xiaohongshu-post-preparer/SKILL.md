@@ -14,7 +14,7 @@ This skill does not click `发布`. It prepares:
 - image assets
 - per-post asset manifests
 
-Use [$xiaohongshu-image-note-publisher](/Users/ursula/Documents/Playground/academic_blogger/skills/xiaohongshu-image-note-publisher/SKILL.md) only after the content and assets are ready.
+Use [$xiaohongshu-image-note-publisher](../xiaohongshu-image-note-publisher/SKILL.md) only after the content and assets are ready.
 
 ## Post Types
 
@@ -144,17 +144,17 @@ Capabilities:
 Example: overview assets
 
 ```bash
-python3 /Users/ursula/.codex/skills/xiaohongshu-post-preparer/scripts/prepare_xhs_post_assets.py \
+python3 ./skills/xiaohongshu-post-preparer/scripts/prepare_xhs_post_assets.py \
   --mode overview \
   --paper omniroam:2603.30045:OmniRoam \
   --paper mv_roma:2603.27542:MV-RoMa \
-  --outdir /Users/ursula/Documents/Playground/daily_paper/arxiv_march/spatial-intelligence/xhs_assets
+  --outdir ./daily_paper/arxiv_march/spatial-intelligence/xhs_assets
 ```
 
 Example: single-paper assets
 
 ```bash
-python3 /Users/ursula/.codex/skills/xiaohongshu-post-preparer/scripts/prepare_xhs_post_assets.py \
+python3 ./skills/xiaohongshu-post-preparer/scripts/prepare_xhs_post_assets.py \
   --mode single \
   --paper hydra:2603.25716:HyDRA \
   --hf-paper-url hydra:https://huggingface.co/papers/2603.25716 \

@@ -23,19 +23,19 @@ This repo is intentionally small and composable. Most detail lives in the dedica
 
 ## Read This Next
 
-- Setup and environment requirements: [SETUP.md](/Users/ursula/Documents/Playground/academic_blogger/SETUP.md)
-- Prompt examples and end-to-end workflows: [TUTORIAL.md](/Users/ursula/Documents/Playground/academic_blogger/TUTORIAL.md)
+- Setup and environment requirements: [SETUP.md](./SETUP.md)
+- Prompt examples and end-to-end workflows: [TUTORIAL.md](./TUTORIAL.md)
 
 Chinese versions:
 
-- [README.zh-CN.md](/Users/ursula/Documents/Playground/academic_blogger/README.zh-CN.md)
-- [SETUP.zh-CN.md](/Users/ursula/Documents/Playground/academic_blogger/SETUP.zh-CN.md)
-- [TUTORIAL.zh-CN.md](/Users/ursula/Documents/Playground/academic_blogger/TUTORIAL.zh-CN.md)
+- [README.zh-CN.md](./README.zh-CN.md)
+- [SETUP.zh-CN.md](./SETUP.zh-CN.md)
+- [TUTORIAL.zh-CN.md](./TUTORIAL.zh-CN.md)
 
 ## Quick Start
 
 1. Clone the repo.
-2. Install the Python dependencies from [SETUP.md](/Users/ursula/Documents/Playground/academic_blogger/SETUP.md).
+2. Install the Python dependencies from [SETUP.md](./SETUP.md).
 3. Symlink the skills you want into `$CODEX_HOME/skills`.
 4. If you plan to publish, log into Xiaohongshu creator center in Safari and enable the required Safari/macOS permissions.
 
@@ -61,7 +61,7 @@ ln -sfn /path/to/auto-academic-blogger/skills/xiaohongshu-image-note-publisher ~
 Example prompts:
 
 ```text
-Use $arxiv-paper-screener to search spatial intelligence papers from the last 30 days and save the results to /Users/you/Documents/Playground/daily_paper/arxiv_march
+Use $arxiv-paper-screener to search spatial intelligence papers from the last 30 days and save the results to ./daily_paper/arxiv_march
 ```
 
 ```text

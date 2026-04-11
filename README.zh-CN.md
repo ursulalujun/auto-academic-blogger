@@ -23,19 +23,19 @@
 
 ## 建议先看
 
-- 环境和安装说明：[SETUP.zh-CN.md](/Users/ursula/Documents/Playground/academic_blogger/SETUP.zh-CN.md)
-- Prompt 示例和完整工作流：[TUTORIAL.zh-CN.md](/Users/ursula/Documents/Playground/academic_blogger/TUTORIAL.zh-CN.md)
+- 环境和安装说明：[SETUP.zh-CN.md](./SETUP.zh-CN.md)
+- Prompt 示例和完整工作流：[TUTORIAL.zh-CN.md](./TUTORIAL.zh-CN.md)
 
 英文版本：
 
-- [README.md](/Users/ursula/Documents/Playground/academic_blogger/README.md)
-- [SETUP.md](/Users/ursula/Documents/Playground/academic_blogger/SETUP.md)
-- [TUTORIAL.md](/Users/ursula/Documents/Playground/academic_blogger/TUTORIAL.md)
+- [README.md](./README.md)
+- [SETUP.md](./SETUP.md)
+- [TUTORIAL.md](./TUTORIAL.md)
 
 ## 快速开始
 
 1. clone 仓库
-2. 按 [SETUP.zh-CN.md](/Users/ursula/Documents/Playground/academic_blogger/SETUP.zh-CN.md) 安装 Python 依赖
+2. 按 [SETUP.zh-CN.md](./SETUP.zh-CN.md) 安装 Python 依赖
 3. 把需要的 skill 链接到 `$CODEX_HOME/skills`
 4. 如果要发小红书，在 Safari 登录创作中心，并打开所需权限
 
@@ -61,7 +61,7 @@ ln -sfn /path/to/auto-academic-blogger/skills/xiaohongshu-image-note-publisher ~
 示例 prompt：
 
 ```text
-用 $arxiv-paper-screener 检索最近 30 天的 spatial intelligence 论文，并保存到 /Users/you/Documents/Playground/daily_paper/arxiv_march
+用 $arxiv-paper-screener 检索最近 30 天的 spatial intelligence 论文，并保存到 ./daily_paper/arxiv_march
 ```
 
 ```text
