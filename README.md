@@ -1,17 +1,31 @@
 <table>
   <tr>
-    <td width="110">
-      <img src="./assets/logo.png" alt="Echoes of Paper logo" width="92" />
+    <td valign="bottom">
+      <img src="./assets/logo.png" alt="Echoes of Paper logo" width="95" />
     </td>
-    <td>
-      <h1>论文的再现<br/>Echoes of Paper</h1>
+    <td width="36"></td>
+    <td valign="bottom" style="padding-left: 2px;">
+      <p align="center" style="margin: 0 0 8px 0; line-height: 1.05;">
+        <strong><font size="7">Echoes of Paper</font></strong>
+      </p>
+      <p align="center" style="margin: 0 0 8px 0;">━━━━━━━━━━━━━━━━━━</p>
+      <p align="center" style="margin: 0;"><a href="./README.zh-CN.md">中文</a> | <strong>English</strong></p>
     </td>
   </tr>
 </table>
 
-[中文](./README.zh-CN.md) | **English**
+<p align="center">
+  <a href="https://www.xiaohongshu.com/user/profile/6512d3ff000000002402f626">📮 Xiaohongshu</a>
+  ·
+  <a href="./SETUP.md">🛠 Setup</a>
+  ·
+  <a href="./TUTORIAL.md">🧭 Tutorial</a>
+</p>
 
-This repository is the operating source code behind the Xiaohongshu account [论文的再现 / Echoes of Paper](https://www.xiaohongshu.com/user/profile/6512d3ff000000002402f626).
+<p align="center">
+  This repository is the operating source code behind the Xiaohongshu account
+  <a href="https://www.xiaohongshu.com/user/profile/6512d3ff000000002402f626"><strong>论文的再现 / Echoes of Paper</strong></a>.
+</p>
 
 It packages the workflows, skills, and helper scripts used to discover papers, screen them, draft posts, prepare assets, and publish academic content.
 

@@ -1,17 +1,32 @@
 <table>
   <tr>
-    <td width="110">
-      <img src="./assets/logo.png" alt="论文的再现 logo" width="92" />
+    <td valign="bottom">
+      <img src="./assets/logo.png" alt="论文的再现 logo" width="95" />
     </td>
-    <td>
-      <h1>论文的再现<br/>Echoes of Paper</h1>
+    <td width="36"></td>
+    <td valign="bottom" style="padding-left: 2px;">
+      <p align="center" style="margin: 0 0 8px 0; line-height: 1.05;">
+        <strong><font size="7">论文的再现</font></strong>
+      </p>
+      <p align="center" style="margin: 0 0 8px 0;">━━━━━━━━━━━━━━━━━━</p>
+      <p align="center" style="margin: 0;"><strong>中文</strong> | <a href="./README.md">English</a></p>
     </td>
   </tr>
 </table>
 
-**中文** | [English](./README.md)
+<p align="center">
+  <a href="https://www.xiaohongshu.com/user/profile/6512d3ff000000002402f626">📮 小红书主页</a>
+  ·
+  <a href="./SETUP.zh-CN.md">🛠 安装说明</a>
+  ·
+  <a href="./TUTORIAL.zh-CN.md">🧭 使用教程</a>
+</p>
 
-这个仓库是小红书账号 [论文的再现 / Echoes of Paper](https://www.xiaohongshu.com/user/profile/6512d3ff000000002402f626) 的运营源代码。
+<p align="center">
+  这个仓库是小红书账号
+  <a href="https://www.xiaohongshu.com/user/profile/6512d3ff000000002402f626"><strong>论文的再现 / Echoes of Paper</strong></a>
+  的运营源代码。
+</p>
 
 它把“找论文、筛论文、写分享、配图、发帖”整理成一套可复用的 workflow、skill 和辅助脚本。
 
