@@ -1,7 +1,7 @@
 <img src="./assets/logo.png" alt="论文的再现 logo" width="95" align="left" />
 
 <div align="center">
-  <img src="./assets/title-zh.svg" alt="论文的再现" width="360" />
+  <img src="./assets/title-zh.svg" alt="论文的再现" width="380" />
   <p style="margin: 0 0 8px 0;">━━━━━━━━━━━━━━━━━━</p>
   <p style="margin: 0;"><strong>中文</strong> | <a href="./README.md">English</a></p>
 </div>

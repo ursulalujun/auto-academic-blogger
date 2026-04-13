@@ -1,7 +1,7 @@
 <img src="./assets/logo.png" alt="Echoes of Paper logo" width="95" align="left" />
 
 <div align="center">
-  <img src="./assets/title-en.svg" alt="Echoes of Paper" width="520" />
+  <img src="./assets/title-en.svg" alt="Echoes of Paper" width="400" />
   <p style="margin: 0 0 8px 0;">━━━━━━━━━━━━━━━━━━</p>
   <p style="margin: 0;"><a href="./README.zh-CN.md">中文</a> | <strong>English</strong></p>
 </div>
