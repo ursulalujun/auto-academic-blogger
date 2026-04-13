@@ -1,18 +1,14 @@
-<table>
-  <tr>
-    <td valign="bottom">
-      <img src="./assets/logo.png" alt="论文的再现 logo" width="95" />
-    </td>
-    <td width="36"></td>
-    <td valign="bottom" style="padding-left: 2px;">
-      <p align="center" style="margin: 0 0 8px 0; line-height: 1.05;">
-        <strong><font size="7">论文的再现</font></strong>
-      </p>
-      <p align="center" style="margin: 0 0 8px 0;">━━━━━━━━━━━━━━━━━━</p>
-      <p align="center" style="margin: 0;"><strong>中文</strong> | <a href="./README.md">English</a></p>
-    </td>
-  </tr>
-</table>
+<img src="./assets/logo.png" alt="论文的再现 logo" width="95" align="left" />
+
+<div align="center">
+  <p style="margin: 0 0 8px 0; line-height: 1.05;">
+    <strong><font size="7">论文的再现</font></strong>
+  </p>
+  <p style="margin: 0 0 8px 0;">━━━━━━━━━━━━━━━━━━</p>
+  <p style="margin: 0;"><strong>中文</strong> | <a href="./README.md">English</a></p>
+</div>
+
+<br clear="left" />
 
 <p align="center">
   <a href="https://www.xiaohongshu.com/user/profile/6512d3ff000000002402f626">📮 小红书主页</a>
