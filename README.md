@@ -1,8 +1,19 @@
-# auto-academic-blogger
+<table>
+  <tr>
+    <td width="110">
+      <img src="./assets/logo.png" alt="Echoes of Paper logo" width="92" />
+    </td>
+    <td>
+      <h1>论文的再现<br/>Echoes of Paper</h1>
+    </td>
+  </tr>
+</table>
 
 [中文](./README.zh-CN.md) | **English**
 
-Reusable Codex skills for building an academic content agent: discover papers, screen them, draft social posts, prepare assets, and publish Xiaohongshu notes.
+This repository is the operating source code behind the Xiaohongshu account [论文的再现 / Echoes of Paper](https://www.xiaohongshu.com/user/profile/6512d3ff000000002402f626).
+
+It packages the workflows, skills, and helper scripts used to discover papers, screen them, draft posts, prepare assets, and publish academic content.
 
 This repo is intentionally small and composable. Most detail lives in the dedicated docs below.
 

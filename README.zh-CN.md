@@ -1,8 +1,19 @@
-# auto-academic-blogger
+<table>
+  <tr>
+    <td width="110">
+      <img src="./assets/logo.png" alt="论文的再现 logo" width="92" />
+    </td>
+    <td>
+      <h1>论文的再现<br/>Echoes of Paper</h1>
+    </td>
+  </tr>
+</table>
 
 **中文** | [English](./README.md)
 
-这是一个围绕学术内容工作流构建的 Codex skill 仓库，用来把“找论文、筛论文、写分享、配图、发帖”做成可复用流程。
+这个仓库是小红书账号 [论文的再现 / Echoes of Paper](https://www.xiaohongshu.com/user/profile/6512d3ff000000002402f626) 的运营源代码。
+
+它把“找论文、筛论文、写分享、配图、发帖”整理成一套可复用的 workflow、skill 和辅助脚本。
 
 仓库本身尽量保持轻量，详细说明分别放在 setup 和 tutorial 文档里。
 
