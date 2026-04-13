@@ -1,9 +1,7 @@
 <img src="./assets/logo.png" alt="论文的再现 logo" width="95" align="left" />
 
 <div align="center">
-  <p style="margin: 0 0 8px 0; line-height: 1.05;">
-    <strong><font size="7">论文的再现</font></strong>
-  </p>
+  <img src="./assets/title-zh.svg" alt="论文的再现" width="360" />
   <p style="margin: 0 0 8px 0;">━━━━━━━━━━━━━━━━━━</p>
   <p style="margin: 0;"><strong>中文</strong> | <a href="./README.md">English</a></p>
 </div>
@@ -18,11 +16,8 @@
   <a href="./TUTORIAL.zh-CN.md">🧭 使用教程</a>
 </p>
 
-<p align="center">
-  这个仓库是小红书账号
-  <a href="https://www.xiaohongshu.com/user/profile/6512d3ff000000002402f626"><strong>论文的再现 / Echoes of Paper</strong></a>
-  的运营源代码。
-</p>
+
+这个仓库是小红书账号<a href="https://www.xiaohongshu.com/user/profile/6512d3ff000000002402f626"><strong>论文的再现 / Echoes of Paper</strong></a>的运营源代码。
 
 它把“找论文、筛论文、写分享、配图、发帖”整理成一套可复用的 workflow、skill 和辅助脚本。
 

@@ -1,9 +1,7 @@
 <img src="./assets/logo.png" alt="Echoes of Paper logo" width="95" align="left" />
 
 <div align="center">
-  <p style="margin: 0 0 8px 0; line-height: 1.05;">
-    <strong><font size="7">Echoes of Paper</font></strong>
-  </p>
+  <img src="./assets/title-en.svg" alt="Echoes of Paper" width="520" />
   <p style="margin: 0 0 8px 0;">━━━━━━━━━━━━━━━━━━</p>
   <p style="margin: 0;"><a href="./README.zh-CN.md">中文</a> | <strong>English</strong></p>
 </div>
@@ -18,10 +16,8 @@
   <a href="./TUTORIAL.md">🧭 Tutorial</a>
 </p>
 
-<p align="center">
-  This repository is the operating source code behind the Xiaohongshu account
-  <a href="https://www.xiaohongshu.com/user/profile/6512d3ff000000002402f626"><strong>论文的再现 / Echoes of Paper</strong></a>.
-</p>
+This repository is the operating source code behind the Xiaohongshu account
+<a href="https://www.xiaohongshu.com/user/profile/6512d3ff000000002402f626"><strong>论文的再现 / Echoes of Paper</strong></a>.
 
 It packages the workflows, skills, and helper scripts used to discover papers, screen them, draft posts, prepare assets, and publish academic content.
 
